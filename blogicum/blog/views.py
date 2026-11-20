@@ -1,47 +1,36 @@
 from django.shortcuts import render, get_object_or_404
-from django.utils import timezone
 
 from .models import Post, Category
 
 
+# Выносим "магическое число" в именованную константу модуля
+POSTS_PER_PAGE = 5
+
+
 def index(request):
-    template = 'blog/index.html'
-    post_list = Post.objects.filter(
-        is_published=True,
-        pub_date__lte=timezone.now(),
-        category__is_published=True,
-    ).order_by('-pub_date')[:5]
+    post_list = Post.objects.available()[:POSTS_PER_PAGE]
     context = {'post_list': post_list}
-    return render(request, template, context)
+    return render(request, 'blog/index.html', context)
 
 
-def post_detail(request, id):
-    template = 'blog/detail.html'
+def post_detail(request, pk):
     post = get_object_or_404(
-        Post,
-        id=id,
-        is_published=True,
-        pub_date__lte=timezone.now(),
-        category__is_published=True,
+        Post.objects.available().with_relations(),
+        pk=pk,
     )
     context = {'post': post}
-    return render(request, template, context)
+    return render(request, 'blog/detail.html', context)
 
 
 def category_posts(request, category_slug):
-    template = 'blog/category.html'
     category = get_object_or_404(
         Category,
         slug=category_slug,
         is_published=True,
     )
-    post_list = Post.objects.filter(
-        category=category,
-        is_published=True,
-        pub_date__lte=timezone.now(),
-    ).order_by('-pub_date')
+    post_list = category.posts.published()
     context = {
         'category': category,
         'post_list': post_list,
     }
-    return render(request, template, context)
+    return render(request, 'blog/category.html', context)

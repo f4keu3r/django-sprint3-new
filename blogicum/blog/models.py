@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth import get_user_model
 
 from core.models import PublishedModel
+from .querysets import PostQuerySet
 
 
 User = get_user_model()
@@ -40,14 +41,13 @@ class Post(PublishedModel):
         null=True,
         verbose_name='Категория',
     )
-    created_at = models.DateTimeField(
-        'Добавлено',
-        auto_now_add=True,
-    )
+    objects = PostQuerySet.as_manager()
 
     class Meta:
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
+        default_related_name = 'posts'
+        ordering = ('-pub_date',)
 
 
 class Category(PublishedModel):
@@ -67,10 +67,6 @@ class Category(PublishedModel):
             'цифры, дефис и подчёркивание.'
         ),
     )
-    created_at = models.DateTimeField(
-        'Добавлено',
-        auto_now_add=True
-    )
 
     class Meta:
         verbose_name = 'категория'
@@ -81,10 +77,6 @@ class Location(PublishedModel):
     name = models.CharField(
         'Название места',
         max_length=256
-    )
-    created_at = models.DateTimeField(
-        'Добавлено',
-        auto_now_add=True
     )
 
     class Meta:
