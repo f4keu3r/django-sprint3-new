@@ -8,7 +8,11 @@ POSTS_PER_PAGE = 5
 
 
 def index(request):
-    post_list = Post.objects.available()[:POSTS_PER_PAGE]
+    post_list = (
+        Post.objects
+        .available()
+        .with_relations()[:POSTS_PER_PAGE]
+    )
     context = {'post_list': post_list}
     return render(request, 'blog/index.html', context)
 
@@ -28,7 +32,11 @@ def category_posts(request, category_slug):
         slug=category_slug,
         is_published=True,
     )
-    post_list = category.posts.published()
+    post_list = (
+        category.posts
+        .available()
+        .with_relations()
+    )
     context = {
         'category': category,
         'post_list': post_list,
